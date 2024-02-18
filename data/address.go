@@ -1,6 +1,10 @@
 package data
 
-import "errors"
+import (
+	"errors"
+	"log"
+	"reverse-proxy-test/proxy"
+)
 
 type URLService struct {
 	Key string
@@ -25,4 +29,19 @@ func (ps *ProxyServices) GetServices() ([]URLService, error) {
 	}
 
 	return nil, errors.New("no services available. try load them before")
+}
+
+func (ps *ProxyServices) ParseToProxy(services []URLService) []*proxy.URIParser {
+	var proxies []*proxy.URIParser
+
+	for _, service := range services {
+		log.Printf("SERVICE %s | URL %s", service.Key, service.URL)
+		if proxyParser, err := proxy.NewURIParser(service.URL); err == nil {
+			proxies = append(proxies, proxyParser)
+		} else {
+			panic(errors.New("no address to proxy"))
+		}
+	}
+
+	return proxies
 }
